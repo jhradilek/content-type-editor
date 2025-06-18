@@ -28,7 +28,7 @@ from asciidoc import content_types, index_files, update_files
 
 def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['file', 'prefix', 'contents']):
     return st.data_editor(
-        data, #.replace({'file': r'^.*/'}, {'file': ''}, regex=True),
+        data,
         column_config= {
             'file': st.column_config.Column(
                 'File name',
@@ -54,7 +54,6 @@ def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['f
         hide_index=True
     )
 
-#st.set_page_config(layout="wide")
 st.title("Content type editor")
 
 if 'df' not in st.session_state:
