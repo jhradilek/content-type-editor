@@ -21,16 +21,9 @@
 # ARISING FROM,  OUT OF OR IN CONNECTION WITH  THE SOFTWARE  OR  THE USE OR
 # OTHER DEALINGS IN THE SOFTWARE.
 
-import sys
-
 import os
 import re
 import pandas as pd
-
-r_line_ending    = re.compile(r"([\n\r]+)")
-r_comment_block  = re.compile(r"^/{4,}\s*$")
-r_comment_line   = re.compile(r"^(?://|//[^/].*)$")
-r_content_type   = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
 
 content_map = {
     'Image':       re.compile(r"^image::(?:\S|\S.*\S)\[.*\]\s*$"),
@@ -55,6 +48,10 @@ def parse_file(path, filename):
     content_type = None
     file_prefix  = None
     contents     = []
+
+    r_comment_block  = re.compile(r"^/{4,}\s*$")
+    r_comment_line   = re.compile(r"^(?://|//[^/].*)$")
+    r_content_type   = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
 
     for prefix, value in prefix_map.items():
         if filename.startswith(prefix + '_') or filename.startswith(prefix + '-'):
@@ -102,6 +99,8 @@ def index_files(path):
 
 def update_files(df):
     count = 0
+
+    r_line_ending    = re.compile(r"([\n\r]+)")
 
     for i, entry in df.iterrows():
         with open(entry['path'], 'r+') as f:
