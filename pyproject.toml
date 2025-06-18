@@ -18,6 +18,11 @@ dependencies = [
 ]
 dynamic = ["version"]
 
+[project.urls]
+Homepage = "https://github.com/jhradilek/content-type-editor"
+Repository = "https://github.com/jhradilek/content-type-editor"
+Issues = "https://github.com/jhradilek/content-type-editor/issues"
+
 [project.scripts]
 content-type-editor = "content_type_editor.cli:parse_args"
 
