@@ -61,7 +61,7 @@ def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['f
 directory = sys.argv[1]
 
 # Display the web UI title:
-st.title("Content type editor")
+st.title("AsciiDoc Content Type Editor")
 
 # Check if this the session has just started or the page was reloaded:
 if 'df' not in st.session_state:
