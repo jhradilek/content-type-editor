@@ -78,6 +78,8 @@ if 'df' not in st.session_state:
 if 'df' in st.session_state:
     # Process the data and prepare relevant slices:
     df           = st.session_state['df']
+    overview     = df.copy()
+    overview['type'] = overview['type'].fillna('Undefined')
     with_type    = df[df['type'].notna()].copy()
     temp         = df[df['type'].isna()].copy()
     temp['type'] = temp['prefix']
@@ -94,8 +96,8 @@ if 'df' in st.session_state:
 
     # Display a bar chart with an overview of known content types:
     with st.expander(f"Distribution of content types in {dirname}", expanded=True):
-        if not with_type.empty:
-            st.bar_chart(with_type.groupby(['type']).size().reset_index(name='count'), x='type', y_label='', horizontal=True)
+        if not overview.empty:
+            st.bar_chart(overview.groupby(['type']).size().reset_index(name='count'), x='type', y_label='', horizontal=True)
 
     # Display a table with the files that have content type already defined:
     with st.expander("Files with the content type defined", expanded=False):
