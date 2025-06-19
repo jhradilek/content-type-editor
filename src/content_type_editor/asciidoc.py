@@ -25,6 +25,7 @@ import os
 import re
 import pandas as pd
 
+# Define the mapping of file prefixes to content types:
 prefix_map = {
     'assembly': 'Assembly',
     'con': 'Concept',
@@ -33,8 +34,10 @@ prefix_map = {
     'snip': 'Snippet'
 }
 
+# Define the list of supported content types:
 content_types = prefix_map.values()
 
+# Define regular expressions for various AsciiDoc markup:
 r_add_resources  = re.compile(r"^(?:={2,}\s+|\.{1,2})Additional resources\s*$")
 r_comment_block  = re.compile(r"^/{4,}\s*$")
 r_comment_line   = re.compile(r"^(?://|//[^/].*)$")
@@ -48,42 +51,57 @@ content_map = {
     'Table':       re.compile(r"^\|={3,}\s*$")
 }
 
+# Read an AsciiDoc file and return a dictionary with information about it:
 def parse_file(path, filename):
-    in_comment_block = False
-
+    # Set the default values for the dictionary:
     content_type = None
     file_prefix  = None
     contents     = []
 
+    # Set the variable to keep track of block comments:
+    in_comment_block = False
+
+    # Determine the content type from the prefix:
     for prefix, value in prefix_map.items():
         if filename.startswith(prefix + '_') or filename.startswith(prefix + '-'):
             file_prefix = value
             break
 
-    with open(path, 'r') as f:
-        for line in f:
-            if r_comment_block.search(line):
-                delimiter = line.strip()
-                if not in_comment_block:
-                    in_comment_block = delimiter
-                elif in_comment_block == delimiter:
-                    in_comment_block = False
-                continue
+    try:
+        # Parse the AsciiDoc file:
+        with open(path, 'r') as f:
+            for line in f:
+                # Ignore content in comment blocks:
+                if r_comment_block.search(line):
+                    delimiter = line.strip()
+                    if not in_comment_block:
+                        in_comment_block = delimiter
+                    elif in_comment_block == delimiter:
+                        in_comment_block = False
+                    continue
 
-            if r_comment_line.search(line):
-                continue
+                # Ignore content in single-line comments:
+                if r_comment_line.search(line):
+                    continue
 
-            if r_add_resources.search(line):
-                break
+                # Ignore content in additional resources:
+                if r_add_resources.search(line):
+                    break
 
-            if m := r_content_type.search(line):
-                content_type = m.group(1).capitalize()
-                continue
+                # Determine the content type from the attribute:
+                if m := r_content_type.search(line):
+                    content_type = m.group(1).capitalize()
+                    continue
 
-            for block, regex in content_map.items():
-                if regex.search(line) and block not in contents:
-                    contents.append(block)
+                # Record the presence of certain block elements:
+                for block, regex in content_map.items():
+                    if regex.search(line) and block not in contents:
+                        contents.append(block)
+    except:
+        # Mark the file as unreadable:
+        contents = ['File unreadable']
 
+    # Return the result:
     return {
         'file': filename,
         'path': path,
@@ -92,40 +110,66 @@ def parse_file(path, filename):
         'contents': ', '.join(sorted(contents))
     }
 
+# Find all AsciiDoc files in the selected directory and all of its
+# subdirectories and return a DataFrame with records about each:
 def index_files(path):
+    # Create an empty list to collect the records in:
     result = []
 
+    # Find all files recursively:
     for root, dirs, files in os.walk(path, topdown=True):
         for name in files:
+            # Exclude files that are not expected to have a content type:
             if name.startswith('_') or name == 'master.adoc':
                 continue
+
+            # Process files with a supported extension:
             if name.endswith('.adoc') or name.endswith('.asciidoc'):
                 result.append(parse_file(os.path.join(root, name), name))
 
+    # Return the result:
     return pd.DataFrame(result)
 
+# Add the content type attribute to the selected files:
 def update_files(df):
+    # Initiate the counter:
     count = 0
 
+    # Process each record:
     for i, entry in df.iterrows():
-        with open(entry['path'], 'r+') as f:
-            line = f.readline()
+        try:
+            # Open the file for updating:
+            with open(entry['path'], 'r+') as f:
+                # Read the first line of the file:
+                line = f.readline()
 
-            if m := r_line_ending.search(line):
-                line_ending = m.group(1)
-            else:
-                line_ending = "\n"
+                # Use this line to determine the line endings used:
+                if m := r_line_ending.search(line):
+                    line_ending = m.group(1)
+                else:
+                    line_ending = "\n"
 
-            f.seek(0)
-            text = f.read()
-            f.seek(0)
+                # Read the rest of the file:
+                text = f.read()
 
-            f.write(
-                f":_mod-docs-content-type: {entry['type'].upper()}" +
-                line_ending + line_ending +
-                text
-            )
+                # Reset the position of the file handle to the beginning of the
+                # file:
+                f.seek(0)
 
-            count += 1
+                # Write the updated content to the file:
+                f.write(
+                    f":_mod-docs-content-type: {entry['type'].upper()}" +
+                    line_ending + line_ending +
+                    line +
+                    text
+                )
 
+                # Increment the counter
+                count += 1
+        except:
+            # Do nothing here; the web UI uses the counter to report if
+            # some of the files could not be updated:
+            pass
+
+    # Return the number of successfully updated files:
     return count

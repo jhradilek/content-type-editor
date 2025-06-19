@@ -24,8 +24,10 @@
 import sys
 import pandas as pd
 import streamlit as st
+from pathlib import Path
 from asciidoc import content_types, index_files, update_files
 
+# Define a customized version of the st.data_editor widget:
 def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['file', 'prefix', 'contents']):
     return st.data_editor(
         data,
@@ -54,17 +56,27 @@ def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['f
         hide_index=True
     )
 
+# Get the name of the supplied directory; the option parser has already
+# verified that it exists and is a directory:
+directory = sys.argv[1]
+
+# Display the web UI title:
 st.title("Content type editor")
 
+# Check if this the session has just started or the page was reloaded:
 if 'df' not in st.session_state:
+    # Display a progress spinner and build the DataFrame with information
+    # about each AsciiDoc file:
     with st.spinner("Processing AsciiDoc files...", show_time=True):
-        df = index_files(sys.argv[1])
+        df = index_files(directory)
     if df.empty:
         st.error("No AsciiDoc files found.", icon="⚠️")
     else:
         st.session_state.df = df
 
+# Check if the AsciiDoc files have already been indexed:
 if 'df' in st.session_state:
+    # Process the data and prepare relevant slices:
     df           = st.session_state['df']
     with_type    = df[df['type'].notna()].copy()
     temp         = df[df['type'].isna()].copy()
@@ -74,33 +86,53 @@ if 'df' in st.session_state:
     new_prefix   = pd.DataFrame()
     new_other    = pd.DataFrame()
 
-    with st.expander("Content type distribution", expanded=True):
+    # Determine the base name of the directory:
+    if directory == '.':
+        dirname = Path(directory).resolve().name
+    else:
+        dirname = Path(directory).name
+
+    # Display a bar chart with an overview of known content types:
+    with st.expander(f"Distribution of content types in {dirname}", expanded=True):
         if not with_type.empty:
             st.bar_chart(with_type.groupby(['type']).size().reset_index(name='count'), x='type', y_label='', horizontal=True)
 
+    # Display a table with the files that have content type already defined:
     with st.expander("Files with the content type defined", expanded=False):
         if not with_type.empty:
             st_data_editor(with_type, disabled=['file', 'path', 'type', 'prefix', 'contents'])
 
+    # Display a table with the files that have content type identifiable
+    # from their prefix:
     with st.expander("Files with the content type derived from prefix", expanded=True):
         if not with_prefix.empty:
             new_prefix = st_data_editor(with_prefix)
 
+    # Display a table with the files that need manual update:
     with st.expander("Files without the content type defined", expanded=True):
         if not other.empty:
             new_other  = st_data_editor(other)
 
+    # Get a list of files that have a new content type:
     updated = pd.concat([new_prefix, new_other])
     if not updated.empty:
         updated = updated[updated['type'].notna()]
 
+    # Display the button to initiate mass update of the files. Make this
+    # button inactive if there are no files with changed state:
     if st.button("Update files", type='primary', disabled=updated.empty):
+        # Display the progress spinner:
         with st.spinner("Updating AsciiDoc files...", show_time=True):
+            # Add the selected content type to the files and get a final
+            # count of those that have been successfully updated:
             count  = update_files(updated)
+
+            # Get the number of files that were expected to be updated:
             expected = len(updated.index)
 
+            # Verify that both counts match and display an appropriate message:
             if count == expected:
                 st.success(f"Successfully updated {count} files.", icon="✅")
             else:
-                st.error(f"Unable to update {expected - count}/{expected} AsciiDoc files.", icon="⚠️")
+                st.error(f"Failed to update {expected - count} out of {expected} files.", icon="⚠️")
             st.session_state.clear()
