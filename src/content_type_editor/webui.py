@@ -134,7 +134,7 @@ if 'df' in st.session_state:
 
             # Verify that both counts match and display an appropriate message:
             if count == expected:
-                st.success(f"Successfully updated {count} files.", icon="✅")
+                st.success(f"Successfully updated {count} file{'s' if count != 1 else ''}.", icon="✅")
             else:
-                st.error(f"Failed to update {expected - count} out of {expected} files.", icon="⚠️")
+                st.error(f"Failed to update {expected - count} out of {expected} file{'s' if expected != 1 else ''}.", icon="⚠️")
             st.session_state.clear()
