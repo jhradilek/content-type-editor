@@ -25,13 +25,6 @@ import os
 import re
 import pandas as pd
 
-content_map = {
-    'Image':       re.compile(r"^image::(?:\S|\S.*\S)\[.*\]\s*$"),
-    'Procedure':   re.compile(r"^\.{1,2}Procedure\s*$"),
-    'Section':     re.compile(r"^={2,}\s\S.*$"),
-    'Table':       re.compile(r"^\|={3,}\s*$")
-}
-
 prefix_map = {
     'assembly': 'Assembly',
     'con': 'Concept',
@@ -42,16 +35,25 @@ prefix_map = {
 
 content_types = prefix_map.values()
 
+r_add_resources  = re.compile(r"^(?:={2,}\s+|\.{1,2})Additional resources\s*$")
+r_comment_block  = re.compile(r"^/{4,}\s*$")
+r_comment_line   = re.compile(r"^(?://|//[^/].*)$")
+r_content_type   = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
+r_line_ending    = re.compile(r"([\n\r]+)")
+content_map = {
+    'Image':       re.compile(r"^image::(?:\S|\S.*\S)\[.*\]\s*$"),
+    'List':        re.compile(r"^\s*[*-.]+\s+\S.*$"),
+    'Procedure':   re.compile(r"^\.{1,2}Procedure\s*$"),
+    'Section':     re.compile(r"^={2,}\s\S.*$"),
+    'Table':       re.compile(r"^\|={3,}\s*$")
+}
+
 def parse_file(path, filename):
     in_comment_block = False
 
     content_type = None
     file_prefix  = None
     contents     = []
-
-    r_comment_block  = re.compile(r"^/{4,}\s*$")
-    r_comment_line   = re.compile(r"^(?://|//[^/].*)$")
-    r_content_type   = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
 
     for prefix, value in prefix_map.items():
         if filename.startswith(prefix + '_') or filename.startswith(prefix + '-'):
@@ -71,6 +73,9 @@ def parse_file(path, filename):
             if r_comment_line.search(line):
                 continue
 
+            if r_add_resources.search(line):
+                break
+
             if m := r_content_type.search(line):
                 content_type = m.group(1).capitalize()
                 continue
@@ -89,18 +94,18 @@ def parse_file(path, filename):
 
 def index_files(path):
     result = []
+
     for root, dirs, files in os.walk(path, topdown=True):
         for name in files:
             if name.startswith('_') or name == 'master.adoc':
                 continue
             if name.endswith('.adoc') or name.endswith('.asciidoc'):
                 result.append(parse_file(os.path.join(root, name), name))
+
     return pd.DataFrame(result)
 
 def update_files(df):
     count = 0
-
-    r_line_ending    = re.compile(r"([\n\r]+)")
 
     for i, entry in df.iterrows():
         with open(entry['path'], 'r+') as f:
