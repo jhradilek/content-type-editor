@@ -139,18 +139,15 @@ def update_files(df):
     for i, entry in df.iterrows():
         try:
             # Open the file for updating:
-            with open(entry['path'], 'r+') as f:
-                # Read the first line of the file:
-                line = f.readline()
+            with open(entry['path'], 'r+', newline='') as f:
+                # Read the entire file:
+                text = f.read()
 
                 # Use this line to determine the line endings used:
-                if m := r_line_ending.search(line):
+                if m := r_line_ending.search(text):
                     line_ending = m.group(1)
                 else:
                     line_ending = "\n"
-
-                # Read the rest of the file:
-                text = f.read()
 
                 # Reset the position of the file handle to the beginning of the
                 # file:
@@ -160,7 +157,6 @@ def update_files(df):
                 f.write(
                     f":_mod-docs-content-type: {entry['type'].upper()}" +
                     line_ending + line_ending +
-                    line +
                     text
                 )
 
