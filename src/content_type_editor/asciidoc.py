@@ -38,17 +38,19 @@ prefix_map = {
 content_types = prefix_map.values()
 
 # Define regular expressions for various AsciiDoc markup:
-r_add_resources  = re.compile(r"^(?:={2,}\s+|\.{1,2})Additional resources\s*$")
-r_comment_block  = re.compile(r"^/{4,}\s*$")
-r_comment_line   = re.compile(r"^(?://|//[^/].*)$")
-r_content_type   = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
-r_line_ending    = re.compile(r"([\n\r]+)")
+r_add_resources       = re.compile(r"^(?:={2,}\s+|\.{1,2})Additional resources\s*$")
+r_comment_block       = re.compile(r"^/{4,}\s*$")
+r_comment_line        = re.compile(r"^(?://|//[^/].*)$")
+r_content_type        = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
+r_line_ending         = re.compile(r"([\n\r]+)")
 content_map = {
-    'Image':       re.compile(r"^image::(?:\S|\S.*\S)\[.*\]\s*$"),
-    'List':        re.compile(r"^\s*[*-.]+\s+\S.*$"),
-    'Procedure':   re.compile(r"^\.{1,2}Procedure\s*$"),
-    'Section':     re.compile(r"^={2,}\s\S.*$"),
-    'Table':       re.compile(r"^\|={3,}\s*$")
+    'Description list': re.compile(r"^\S.*?(?:;;|:{2,4})(?:\s*|\s+.*)$"),
+    'Image':            re.compile(r"^image::(?:\S|\S.*\S)\[.*\]\s*$"),
+    'Ordered list':     re.compile(r"^\s*\.+\s+\S.*$"),
+    'Procedure':        re.compile(r"^\.{1,2}Procedure\s*$"),
+    'Section':          re.compile(r"^={2,}\s\S.*$"),
+    'Table':            re.compile(r"^\|={3,}\s*$"),
+    'Unordered list':   re.compile(r"^\s*[*-]+\s+\S.*$")
 }
 
 # Read an AsciiDoc file and return a dictionary with information about it:
