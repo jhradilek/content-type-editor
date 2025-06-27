@@ -28,7 +28,7 @@ from pathlib import Path
 from asciidoc import content_types, index_files, update_files
 
 # Define a customized version of the st.data_editor widget:
-def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['file', 'prefix', 'contents']):
+def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['file', 'suggestion', 'contents']):
     return st.data_editor(
         data,
         column_config= {
@@ -42,7 +42,7 @@ def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['f
                 width='small',
                 required=False
             ),
-            'prefix': st.column_config.Column(
+            'suggestion': st.column_config.Column(
                 'Prefix',
                 width='small'
             ),
@@ -82,10 +82,10 @@ if 'df' in st.session_state:
     overview['type'] = overview['type'].fillna('Undefined')
     with_type    = df[df['type'].notna()].copy()
     temp         = df[df['type'].isna()].copy()
-    temp['type'] = temp['prefix']
-    with_prefix  = temp[temp['type'].notna()]
+    temp['type'] = temp['suggestion']
+    with_suggest = temp[temp['type'].notna()]
     other        = temp[temp['type'].isna()]
-    new_prefix   = pd.DataFrame()
+    new_suggest  = pd.DataFrame()
     new_other    = pd.DataFrame()
 
     # Determine the base name of the directory:
@@ -102,23 +102,23 @@ if 'df' in st.session_state:
             col2.metric("AsciiDoc Files", len(df.index), f"{len(temp.index)} undefined")
 
     # Display a table with the files that have content type already defined:
-    with st.expander("Files with the content type defined", expanded=False):
+    with st.expander("Files with defined content type", expanded=False):
         if not with_type.empty:
-            st_data_editor(with_type, disabled=['file', 'path', 'type', 'prefix', 'contents'])
+            st_data_editor(with_type, disabled=['file', 'path', 'type', 'suggestion', 'contents'])
 
     # Display a table with the files that have content type identifiable
-    # from their prefix:
-    with st.expander("Files with the content type derived from prefix", expanded=True):
-        if not with_prefix.empty:
-            new_prefix = st_data_editor(with_prefix)
+    # from their prefix or contents:
+    with st.expander("Files with suggested content type", expanded=True):
+        if not with_suggest.empty:
+            new_suggest = st_data_editor(with_suggest)
 
     # Display a table with the files that need manual update:
-    with st.expander("Files without the content type defined", expanded=True):
+    with st.expander("Files without identifiable content type", expanded=True):
         if not other.empty:
             new_other  = st_data_editor(other)
 
     # Get a list of files that have a new content type:
-    updated = pd.concat([new_prefix, new_other])
+    updated = pd.concat([new_suggest, new_other])
     if not updated.empty:
         updated = updated[updated['type'].notna()]
 

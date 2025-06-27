@@ -57,7 +57,7 @@ content_map = {
 def parse_file(path, filename):
     # Set the default values for the dictionary:
     content_type = None
-    file_prefix  = None
+    suggestion   = None
     contents     = []
 
     # Set the variable to keep track of block comments:
@@ -66,7 +66,7 @@ def parse_file(path, filename):
     # Determine the content type from the prefix:
     for prefix, value in prefix_map.items():
         if filename.startswith(prefix + '_') or filename.startswith(prefix + '-'):
-            file_prefix = value
+            suggestion = value
             break
 
     try:
@@ -99,6 +99,11 @@ def parse_file(path, filename):
                 for block, regex in content_map.items():
                     if regex.search(line) and block not in contents:
                         contents.append(block)
+
+                        # Determine the content type from the contents:
+                        if block == 'Procedure' and not suggestion:
+                            suggestion = block
+
     except:
         # Mark the file as unreadable:
         contents = ['File unreadable']
@@ -108,7 +113,7 @@ def parse_file(path, filename):
         'file': filename,
         'path': path,
         'type': content_type,
-        'prefix': file_prefix,
+        'suggestion': suggestion,
         'contents': ', '.join(sorted(contents))
     }
 
