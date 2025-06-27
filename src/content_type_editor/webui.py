@@ -99,7 +99,7 @@ if 'df' in st.session_state:
         if not overview.empty:
             col1, col2 = st.columns([0.7, 0.3])
             col1.bar_chart(overview.groupby(['type']).size().reset_index(name='count'), x='type', y_label='', horizontal=True)
-            col2.metric("AsciiDoc Files", len(df.index), f"{len(temp.index)} undefined")
+            col2.metric("AsciiDoc Files", len(df.index), f"{len(with_suggest.index)} suggestions")
 
     # Display a table with the files that have content type already defined:
     with st.expander("Files with defined content type", expanded=False):
