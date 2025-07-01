@@ -61,6 +61,12 @@ def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['f
 # verified that it exists and is a directory:
 directory = sys.argv[1]
 
+# Determine the base name of the directory:
+if directory == '.':
+    dirname = Path(directory).resolve().name
+else:
+    dirname = Path(directory).name
+
 # Configure the web UI:
 st.set_page_config(
     page_title = NAME,
@@ -77,7 +83,7 @@ st.title(NAME)
 if 'df' not in st.session_state:
     # Display a progress spinner and build the DataFrame with information
     # about each AsciiDoc file:
-    with st.spinner("Processing AsciiDoc files...", show_time=True):
+    with st.spinner(f"Processing AsciiDoc files in {dirname}...", show_time=True):
         df = index_files(directory)
     if df.empty:
         st.error("No AsciiDoc files found.", icon="⚠️")
@@ -97,12 +103,6 @@ if 'df' in st.session_state:
     other        = temp[temp['type'].isna()]
     new_suggest  = pd.DataFrame()
     new_other    = pd.DataFrame()
-
-    # Determine the base name of the directory:
-    if directory == '.':
-        dirname = Path(directory).resolve().name
-    else:
-        dirname = Path(directory).name
 
     # Display a bar chart with an overview of known content types:
     with st.expander(f"Distribution of content types in {dirname}", expanded=True):
