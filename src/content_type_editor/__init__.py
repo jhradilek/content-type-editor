@@ -32,5 +32,6 @@ __version__     = '0.9.2'
 
 # Expose general information about the project:
 NAME        = 'content-type-editor'
+FULL_NAME   = 'AsciiDoc Content Type Editor'
 VERSION     = __version__
 DESCRIPTION = __doc__

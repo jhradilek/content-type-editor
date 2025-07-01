@@ -26,6 +26,7 @@ import pandas as pd
 import streamlit as st
 from pathlib import Path
 from asciidoc import content_types, index_files, update_files
+from content_type_editor import FULL_NAME as NAME
 
 # Define a customized version of the st.data_editor widget:
 def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['file', 'suggestion', 'contents']):
@@ -60,8 +61,17 @@ def st_data_editor(data, column_order=['file', 'type', 'contents'], disabled=['f
 # verified that it exists and is a directory:
 directory = sys.argv[1]
 
+# Configure the web UI:
+st.set_page_config(
+    page_title = NAME,
+    menu_items={
+        'Get help': "https://github.com/jhradilek/content-type-editor/",
+        'Report a Bug': "https://github.com/jhradilek/content-type-editor/issues"
+    }
+)
+
 # Display the web UI title:
-st.title("AsciiDoc Content Type Editor")
+st.title(NAME)
 
 # Check if this the session has just started or the page was reloaded:
 if 'df' not in st.session_state:
