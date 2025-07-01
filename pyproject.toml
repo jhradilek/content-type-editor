@@ -4,6 +4,7 @@ authors = [{name = "Jaromir Hradilek", email="jhradilek@gmail.com"}]
 description = "Add the content type attribute to AsciiDoc files."
 license = "MIT"
 license-files = ["LICENSE"]
+readme = "README.md"
 requires-python = ">= 3.10"
 classifiers = [
   "Programming Language :: Python :: 3",
