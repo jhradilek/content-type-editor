@@ -44,6 +44,7 @@ r_comment_line        = re.compile(r"^(?://|//[^/].*)$")
 r_content_type        = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
 r_line_ending         = re.compile(r"(\r?\n|\r)")
 content_map = {
+    'Callout list':     re.compile(r"^<(?:1|\.)>\s+"),
     'Description list': re.compile(r"^\S.*?(?:;;|:{2,4})(?:\s*|\s+.*)$"),
     'Image':            re.compile(r"^image::(?:\S|\S.*\S)\[.*\]\s*$"),
     'Ordered list':     re.compile(r"^\s*\.+\s+\S.*$"),
