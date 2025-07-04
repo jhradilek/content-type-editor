@@ -45,6 +45,7 @@ r_content_type        = re.compile(r"^:_(?:mod-docs-content|content|module)-type
 r_line_ending         = re.compile(r"(\r?\n|\r)")
 content_map = {
     'Callout list':     re.compile(r"^<(?:1|\.)>\s+"),
+    'Code block':       re.compile(r"^(?:\.{4,}|-{4,})\s*$"),
     'Description list': re.compile(r"^\S.*?(?:;;|:{2,4})(?:\s*|\s+.*)$"),
     'Image':            re.compile(r"^image::(?:\S|\S.*\S)\[.*\]\s*$"),
     'Ordered list':     re.compile(r"^\s*\.+\s+\S.*$"),
