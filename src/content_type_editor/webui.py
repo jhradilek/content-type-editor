@@ -108,9 +108,18 @@ if 'df' in st.session_state:
     with st.expander(f"Distribution of content types in {dirname}", expanded=True):
         if not overview.empty:
             suggestions = len(with_suggest.index)
+            found_files = len(df.index)
+
+            # Display a notification if the number of files is high:
+            if found_files > 20000:
+                st.info("The number of discovered AsciiDoc files is \
+                        unusually high. Make sure you are running this \
+                        program in the correct directory and that you \
+                        have removed all unwanted temporary files.")
+
             col1, col2 = st.columns([0.7, 0.3])
             col1.bar_chart(overview.groupby(['type']).size().reset_index(name='count'), x='type', y_label='', horizontal=True)
-            col2.metric("AsciiDoc Files", len(df.index), f"{suggestions} suggestion{'s' if suggestions != 1 else ''}")
+            col2.metric("AsciiDoc Files", found_files, f"{suggestions} suggestion{'s' if suggestions != 1 else ''}")
 
     # Display a table with the files that have content type already defined:
     with st.expander("Files with defined content type", expanded=False):
