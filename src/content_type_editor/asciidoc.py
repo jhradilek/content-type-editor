@@ -83,6 +83,8 @@ def parse_file(path, filename):
                     elif in_comment_block == delimiter:
                         in_comment_block = False
                     continue
+                if in_comment_block:
+                    continue
 
                 # Ignore content in single-line comments:
                 if r_comment_line.search(line):
