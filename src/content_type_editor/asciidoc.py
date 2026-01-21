@@ -28,6 +28,7 @@ import pandas as pd
 # Define the mapping of file prefixes to content types:
 prefix_map = {
     'assembly': 'Assembly',
+    'attr': 'Attributes',
     'con': 'Concept',
     'proc': 'Procedure',
     'ref': 'Reference',
