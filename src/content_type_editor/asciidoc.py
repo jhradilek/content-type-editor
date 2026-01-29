@@ -42,7 +42,7 @@ content_types = prefix_map.values()
 r_add_resources       = re.compile(r"^(?:={2,}\s+|\.{1,2})Additional resources\s*$")
 r_comment_block       = re.compile(r"^/{4,}\s*$")
 r_comment_line        = re.compile(r"^(?://|//[^/].*)$")
-r_content_type        = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
+r_content_type        = re.compile(r"^:_(?:mod-docs-content|content|module)-type:\s+(ASSEMBLY|ATTRIBUTES|CONCEPT|PROCEDURE|REFERENCE|SNIPPET)")
 r_line_ending         = re.compile(r"(\r?\n|\r)")
 content_map = {
     'Callout list':     re.compile(r"^<(?:1|\.)>\s+"),
